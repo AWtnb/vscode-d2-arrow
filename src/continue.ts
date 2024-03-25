@@ -1,40 +1,22 @@
 import * as vscode from "vscode";
 import { D2Line } from "./d2line";
 
-class EditorLine {
-  private readonly indent: string;
-  private readonly d2line: D2Line;
-  private readonly text: string;
-  private readonly maxChar: number;
-  private readonly lineNum: number;
-  constructor(line: vscode.TextLine) {
-    this.indent = line.text.substring(0, line.firstNonWhitespaceCharacterIndex);
-    this.d2line = new D2Line(line.text.trimStart());
-    this.text = line.text;
-    this.maxChar = line.text.length;
-    this.lineNum = line.lineNumber;
-  }
-
-  getNextLine(): string {
-    const l = this.d2line.getNextLine();
-    return this.indent + l;
-  }
-
-  getNewSelection(): vscode.Selection {
-    const ci = this.text.endsWith(":") ? this.maxChar - 1 : this.maxChar;
-    const p = new vscode.Position(this.lineNum, ci);
-    const s = new vscode.Selection(p, p);
-    return s;
-  }
-}
+const makeSelection = (line: vscode.TextLine): vscode.Selection => {
+  const maxChar = line.text.length;
+  const char = line.text.endsWith(":") ? maxChar - 1 : maxChar;
+  const pos = new vscode.Position(line.lineNumber, char);
+  const sel = new vscode.Selection(pos, pos);
+  return sel;
+};
 
 export const continueCursors = (editor: vscode.TextEditor, linebreak: string) => {
   const workspaceEdit = new vscode.WorkspaceEdit();
 
   editor.selections.forEach((sel: vscode.Selection) => {
     const line = editor.document.lineAt(sel.end);
-    const el = new EditorLine(line);
-    const newline = el.getNextLine();
+    const indent = line.text.substring(0, line.firstNonWhitespaceCharacterIndex);
+    const d2line = new D2Line(line.text.trimStart());
+    const newline = indent + d2line.getNextLine();
     const eol = line.range.end;
     if (newline === line.text) {
       workspaceEdit.insert(editor.document.uri, eol, linebreak);
@@ -46,14 +28,11 @@ export const continueCursors = (editor: vscode.TextEditor, linebreak: string) =>
   vscode.workspace.applyEdit(workspaceEdit).then(() => {
     const newSels = editor.selections.map((sel) => {
       const line = editor.document.lineAt(sel.end);
-      let el: EditorLine;
       if (sel.end.character !== line.range.end.character) {
         const nextLine = editor.document.lineAt(sel.end.line + 1);
-        el = new EditorLine(nextLine);
-      } else {
-        el = new EditorLine(line);
+        return makeSelection(nextLine);
       }
-      return el.getNewSelection();
+      return makeSelection(line);
     });
     editor.selections = newSels;
   });
