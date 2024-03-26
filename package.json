@@ -15,7 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:d2q"
+    "onLanguage:d2"
   ],
   "main": "./out/extension.js",
   "contributes": {
