@@ -15,6 +15,16 @@ The new line consists of the following elements:
 - The last element of previous line
 - The last operator of previous line
 
+### `d2-arrow.branch` (alt+shift+enter)
+
+![img](./images/demo-branch.gif)
+
+Insert new line so that the line is a branch of current line.
+The new line consists of the following elements:
+
+- One element before the last element of previous line
+- The last operator of previous line
+
 
 ### `d2-arrow.swap`
 
