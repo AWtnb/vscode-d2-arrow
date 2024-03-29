@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { continueCursors } from "./continue";
+import { branchCursors, continueCursors } from "./continue";
 import { swapCursors } from "./swap";
 
 const toLineBreak = (editor: vscode.TextEditor): string => {
@@ -11,6 +11,13 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerTextEditorCommand("d2-arrow.continue", (editor: vscode.TextEditor) => {
       const linebreak = toLineBreak(editor);
       continueCursors(editor, linebreak);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand("d2-arrow.branch", (editor: vscode.TextEditor) => {
+      const linebreak = toLineBreak(editor);
+      branchCursors(editor, linebreak);
     })
   );
 

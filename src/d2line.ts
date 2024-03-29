@@ -1,4 +1,4 @@
-interface OperatorToken {
+interface Token {
   text: string;
   offset: number;
   length: number;
@@ -10,12 +10,12 @@ export class D2Line {
     this.text = s;
   }
 
-  private getTokens(): OperatorToken[] {
+  private getOperators(): Token[] {
     const regex = /--|(?<!<)->|<-(?!>)|<->/g;
     const matches = this.text.matchAll(regex);
     return [...matches]
       .map((m) => {
-        const ot: OperatorToken = {
+        const ot: Token = {
           text: m[0],
           offset: m.index,
           length: m[0].length,
@@ -29,20 +29,20 @@ export class D2Line {
       });
   }
 
-  private getFirstOperator(): OperatorToken | null {
-    const tokens = this.getTokens();
-    if (tokens.length < 1) {
+  private getFirstOperator(): Token | null {
+    const operators = this.getOperators();
+    if (operators.length < 1) {
       return null;
     }
-    return tokens[0];
+    return operators[0];
   }
 
-  private getLastOperator(): OperatorToken | null {
-    const tokens = this.getTokens();
-    if (tokens.length < 1) {
+  private getLastOperator(): Token | null {
+    const operators = this.getOperators();
+    if (operators.length < 1) {
       return null;
     }
-    return tokens.slice(-1)[0];
+    return operators.slice(-1)[0];
   }
 
   private getFirstText(): string {
@@ -64,6 +64,25 @@ export class D2Line {
       .trim();
   }
 
+  private getLastRootText(): string {
+    const operators = this.getOperators();
+    if (operators.length < 1) {
+      return "";
+    }
+    if (operators.length === 1) {
+      return this.getFirstText();
+    }
+    const last = operators.pop();
+    if (!last) {
+      return "";
+    }
+    const back1 = operators.pop();
+    if (!back1) {
+      return "";
+    }
+    return this.text.substring(back1.offset + back1.length, last.offset).trim();
+  }
+
   private getNotation(): string {
     const ss = this.text.split(":");
     if (ss.length < 2) {
@@ -72,7 +91,7 @@ export class D2Line {
     return ": " + ss.slice(-1)[0].trim();
   }
 
-  getNextLine(): string {
+  GetNextLine(): string {
     const lastOperator = this.getLastOperator();
     if (!lastOperator) {
       return this.text;
@@ -83,6 +102,19 @@ export class D2Line {
     }
     const suf = this.getNotation() ? " :" : " ";
     return lt + " " + lastOperator.text + suf;
+  }
+
+  GetNewBranch(): string {
+    const lastOperator = this.getLastOperator();
+    if (!lastOperator) {
+      return this.text;
+    }
+    const rt = this.getLastRootText();
+    if (rt.length < 1) {
+      return this.text;
+    }
+    const suf = this.getNotation() ? " :" : " ";
+    return rt + " " + lastOperator.text + suf;
   }
 
   Swap(): string {

@@ -26,6 +26,11 @@
         "category": "d2-arrow"
       },
       {
+        "command": "d2-arrow.branch",
+        "title": "branch",
+        "category": "d2-arrow"
+      },
+      {
         "command": "d2-arrow.swap",
         "title": "swap",
         "category": "d2-arrow"
@@ -35,6 +40,11 @@
       {
         "command": "d2-arrow.continue",
         "key": "alt+enter",
+        "when": "editorLangId == 'd2' && editorTextFocus"
+      },
+      {
+        "command": "d2-arrow.branch",
+        "key": "alt+shift+enter",
         "when": "editorLangId == 'd2' && editorTextFocus"
       }
     ]
